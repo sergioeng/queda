@@ -36,6 +36,8 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
+
+
         <activity android:name=".Signals"/>
         <receiver android:name=".Boot" android:enabled="false" android:exported="true" android:label="Boot Receiver">
             <intent-filter>

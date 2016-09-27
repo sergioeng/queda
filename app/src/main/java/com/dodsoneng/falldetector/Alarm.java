@@ -28,9 +28,13 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.net.Uri;
+import android.util.Log;
 import android.widget.Toast;
 
 public class Alarm {
+
+    private static String TAG = "FD.ALARM";
+
     private static SoundPool pool = null;
     private static int id = -1;
 
@@ -54,6 +58,7 @@ public class Alarm {
 
     public static void call(Context context) {
         String contact = Contact.get(context);
+        Log.d (TAG+".call: ", "contact=["+contact+"]");
         if (contact != null && !"".equals(contact)) {
             Toast.makeText(context, "Calling guardian's phone number for help", Toast.LENGTH_SHORT).show();
             Intent call = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + contact));

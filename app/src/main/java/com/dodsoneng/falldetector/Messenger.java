@@ -29,13 +29,20 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
+import android.util.Log;
 
 import java.util.Locale;
 
 public class Messenger extends BroadcastReceiver {
+
+    private static String TAG = "FD.MSSGR";
+
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
+
+        Log.d (TAG+".onReceive(): ", "action=["+action+"]");
+
         if ("android.provider.Telephony.SMS_RECEIVED".equals(action)) {
             Bundle bundle = intent.getExtras();
             Object messages[] = (Object[]) bundle.get("pdus");
@@ -69,6 +76,9 @@ public class Messenger extends BroadcastReceiver {
     }
 
     public static void sms(String contact, String message) {
+
+        Log.d (TAG+".sms(): ", "contact=["+contact+"]  message=[" +message +"]");
+
         SmsManager manager = SmsManager.getDefault();
         manager.sendTextMessage(contact, null, message, null, null);
     }
