@@ -39,6 +39,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private static final String[] INITIAL_PERMS={
             Manifest.permission.CALL_PHONE,
+            Manifest.permission.RECEIVE_SMS,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.READ_CONTACTS
 
@@ -56,11 +57,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
 */
     private Context gContext;
 
-    private static final int INITIAL_REQUEST=1337;
-    private static final int CAMERA_REQUEST=INITIAL_REQUEST+1;
-    private static final int CONTACTS_REQUEST=INITIAL_REQUEST+2;
-    private static final int LOCATION_REQUEST=INITIAL_REQUEST+3;
-    private static final int CALL_PHONE_REQUEST=INITIAL_REQUEST+4;
+    private static final int INITIAL_REQUEST     = 1337;
+    private static final int CAMERA_REQUEST      = INITIAL_REQUEST+1;
+    private static final int CONTACTS_REQUEST    = CAMERA_REQUEST+1;
+    private static final int LOCATION_REQUEST    = CONTACTS_REQUEST+1;
+    private static final int CALL_PHONE_REQUEST  = LOCATION_REQUEST+1;
+    private static final int RECEIVE_SMS_REQUEST = CALL_PHONE_REQUEST+1;
 
 
     private void eula(Context context) {
@@ -70,8 +72,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
         final Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.eula);
         dialog.setTitle("EULA");
+
         WebView web = (WebView) dialog.findViewById(R.id.eula);
         web.loadUrl("file:///android_asset/eula.html");
+
         Button accept = (Button) dialog.findViewById(R.id.accept);
         accept.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,6 +83,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 dialog.dismiss();
             }
         });
+
         dialog.show();
     }
 
@@ -109,21 +114,33 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 intent = new Intent(this, Signals.class);
                 startActivity(intent);
                 return;
+            case R.id.turnoff:
+                this.finish();
+                break;
         }
     }
 
     private void initiateApp () {
 
         Detector.initiate(this);
+
         setContentView(R.layout.actitvity_main);
+
         WebView web = (WebView) findViewById(R.id.about);
         web.loadUrl("file:///android_asset/about.html");
+
         Button help = (Button) findViewById(R.id.help);
         help.setOnClickListener(this);
+
         Button settings = (Button) findViewById(R.id.settings);
         settings.setOnClickListener(this);
+
         Button signals = (Button) findViewById(R.id.signals);
         signals.setOnClickListener(this);
+
+        Button turnoff = (Button) findViewById(R.id.turnoff);
+        turnoff.setOnClickListener(this);
+
         eula(this);
 
     }
@@ -138,6 +155,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
             requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, CALL_PHONE_REQUEST);
             permStatus = false;
         }
+        if (canReceiveSMS() == false) {
+            requestPermissions(new String[]{Manifest.permission.RECEIVE_SMS}, RECEIVE_SMS_REQUEST);
+            permStatus = false;
+        }
         if (canAccessContacts() == false) {
             requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, CONTACTS_REQUEST);
             permStatus = false;
@@ -148,118 +169,24 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
         return permStatus;
 
-        /*
-        if (checkSelfPermission (Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST);
-            permStatus = false;
-        }
-        */
-
-        /*
-        else
-            Toast.makeText(gContext, "Not granted mpermission in Manifest for CALL_PHONE", Toast.LENGTH_LONG).show();
-
-*/
-/*
-
-
-        if (canAccessLocation() == false || canAccessContacts() == false || canAccessCamera() == false  || canCallPhone() == false) {
-            requestPermissions(INITIAL_PERMS, INITIAL_REQUEST);
-            return false;
-        }
-
-        return true;
-*/
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
 
-        /*
-        switch (requestCode) {
-        case CALL_PHONE_REQUEST:
-            // If request is cancelled, the result arrays are empty.
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                // permission was granted, yay! Do the
-                // contacts-related task you need to do.
-                Toast.makeText(gContext, "Granted permission for CALL_PHONE", Toast.LENGTH_LONG).show();
-
-            } else {
-                // permission denied, boo! Disable the
-                // functionality that depends on this permission.
-                Toast.makeText(gContext, "NOT Granted permission for CALL_PHONE", Toast.LENGTH_LONG).show();
-            }
-            break;
-
-        case CONTACTS_REQUEST:
-            // If request is cancelled, the result arrays are empty.
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                // permission was granted, yay! Do the
-                // contacts-related task you need to do.
-                Toast.makeText(gContext, "Granted permission for CONTACTS", Toast.LENGTH_LONG).show();
-
-            } else {
-                // permission denied, boo! Disable the
-                // functionality that depends on this permission.
-                Toast.makeText(gContext, "NOT Granted permission for CONTACTS", Toast.LENGTH_LONG).show();
-            }
-            break;
-        case LOCATION_REQUEST:
-            // If request is cancelled, the result arrays are empty.
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                // permission was granted, yay! Do the
-                // contacts-related task you need to do.
-                Toast.makeText(gContext, "Granted permission for LOCATION", Toast.LENGTH_LONG).show();
-
-            } else {
-                // permission denied, boo! Disable the
-                // functionality that depends on this permission.
-                Toast.makeText(gContext, "NOT Granted permission for LOCATION", Toast.LENGTH_LONG).show();
-            }
-            break;
-        case CAMERA_REQUEST:
-            // If request is cancelled, the result arrays are empty.
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                // permission was granted, yay! Do the
-                // contacts-related task you need to do.
-                Toast.makeText(gContext, "Granted permission for CAMERA", Toast.LENGTH_LONG).show();
-
-            } else {
-                // permission denied, boo! Disable the
-                // functionality that depends on this permission.
-                Toast.makeText(gContext, "NOT Granted permission for CAMERA", Toast.LENGTH_LONG).show();
-            }
-            break;
-
-        }
-        */
         /// Check if all permissions are granted
-        if (checkPermissions () == true) {
+        if (checkPermissions ()) {
             initiateApp ();
         }
 
 
     }
 
-    private boolean canAccessLocation() {
-        return(hasPermission(Manifest.permission.ACCESS_FINE_LOCATION));
-    }
-
-    private boolean canAccessCamera() {
-        return(hasPermission(Manifest.permission.CAMERA));
-    }
-
-    private boolean canAccessContacts() {
-        return(hasPermission(Manifest.permission.READ_CONTACTS));
-    }
-
-    private boolean canCallPhone() {
-        return(hasPermission(Manifest.permission.CALL_PHONE));
-    }
+    private boolean canAccessLocation() {       return(hasPermission(Manifest.permission.ACCESS_FINE_LOCATION));}
+    private boolean canAccessCamera()   {       return(hasPermission(Manifest.permission.CAMERA));              }
+    private boolean canAccessContacts() {       return(hasPermission(Manifest.permission.READ_CONTACTS));       }
+    private boolean canCallPhone()      {       return(hasPermission(Manifest.permission.CALL_PHONE));          }
+    private boolean canReceiveSMS()     {       return(hasPermission(Manifest.permission.RECEIVE_SMS));         }
 
     private boolean hasPermission(String perm) {
         return(PackageManager.PERMISSION_GRANTED==checkSelfPermission(perm));

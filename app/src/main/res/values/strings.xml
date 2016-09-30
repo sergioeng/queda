@@ -5,6 +5,7 @@
     <string name="app">Fall Detector (Experimental)</string>
     <string name="settings">Settings</string>
     <string name="signals">View Signals</string>
+    <string name="turnoff">Turn OFF</string>
     <string name="guardian">Guardian</string>
     <string name="title">Guardian\'s phone number</string>
     <string name="summary">Please set guardian\'s phone number here</string>
