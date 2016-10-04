@@ -56,6 +56,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     };
 */
     private Context gContext;
+    private Dialog    gDialog;
 
     private static final int INITIAL_REQUEST     = 1337;
     private static final int CAMERA_REQUEST      = INITIAL_REQUEST+1;
@@ -66,25 +67,28 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 
     private void eula(Context context) {
+
         // Run the guardian
         Guardian.initiate(this);
-        // Load the EULA
-        final Dialog dialog = new Dialog(context);
-        dialog.setContentView(R.layout.eula);
-        dialog.setTitle("EULA");
 
-        WebView web = (WebView) dialog.findViewById(R.id.eula);
+        // Load the EULA
+        gDialog = new Dialog(context);
+        gDialog.setContentView(R.layout.eula);
+        gDialog.setTitle("EULA");
+
+        WebView web = (WebView) gDialog.findViewById(R.id.eula);
         web.loadUrl("file:///android_asset/eula.html");
 
-        Button accept = (Button) dialog.findViewById(R.id.accept);
+        Button accept = (Button) gDialog.findViewById(R.id.accept);
         accept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.dismiss();
+                gDialog.dismiss();
             }
         });
 
-        dialog.show();
+        gDialog.show();
+
     }
 
     @Override
@@ -115,6 +119,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 startActivity(intent);
                 return;
             case R.id.turnoff:
+                Guardian.terminate(this);
+                gDialog.cancel();
                 this.finish();
                 break;
         }
@@ -122,8 +128,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private void initiateApp () {
 
-        Detector.initiate(this);
-
+//-----------------------------------------------------------------------------------------
+// SERGIO ENG: why two calls to Detecttor.inititate ???, So I commented the following one.
+//->>        Detector.initiate(this);
+//-----------------------------------------------------------------------------------------
         setContentView(R.layout.actitvity_main);
 
         WebView web = (WebView) findViewById(R.id.about);

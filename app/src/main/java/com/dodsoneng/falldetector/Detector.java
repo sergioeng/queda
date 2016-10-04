@@ -57,6 +57,8 @@ public class Detector {
 
     public native static void initiate(Context context);
 
+    public native static void terminate();
+
     public native static void acquire();
 
     public native static double[] buffer();

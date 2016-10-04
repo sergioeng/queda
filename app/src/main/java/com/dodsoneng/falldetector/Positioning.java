@@ -72,16 +72,28 @@ public class Positioning implements LocationListener {
         LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         gps = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         network = manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
         reset();
     }
 
-    public static void initiate(Context context) {
+    public static Positioning initiate(Context context) {
 
-        Log.d (TAG, ".initiate(): in");
+        Log.d (TAG, "initiate():");
 
         if (null == singleton) {
             singleton = new Positioning(context);
         }
+
+        return singleton;
+    }
+
+    public void terminate(Context ctx) {
+
+        Log.d (TAG, "terminate():");
+        LocationManager manager = (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
+        manager.removeUpdates(this);
+
+        singleton = null;
     }
 
     private void run() {

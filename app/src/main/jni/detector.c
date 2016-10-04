@@ -313,6 +313,12 @@ JNIEXPORT void JNICALL Java_com_dodsoneng_falldetector_Detector_initiate(JNIEnv 
     }
 }
 
+JNIEXPORT void JNICALL Java_com_dodsoneng_falldetector_Detector_terminate(JNIEnv *JNI, jclass SelfClass) {
+    ASensorManager *Manager = ASensorManager_getInstance();
+    ASensorManager_destroyEventQueue (Manager, State->Queue);
+    pthread_mutex_destroy (&State->Lock);
+}
+
 JNIEXPORT void JNICALL Java_com_dodsoneng_falldetector_Detector_acquire(JNIEnv *JNI, jclass Self) {
     if (NULL != State) {
         pthread_mutex_lock(&State->Lock);

@@ -32,23 +32,43 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 public class Guardian extends Service {
+
+
+    private static int NOTIFICATION_ID = 1;
+    private static String TAG = "FD.GUARD";
+    private static Intent intent = null;
+    private Context context;
+    private NotificationManager gNotificationManager;
+    private Positioning positioning;
     @Override
     public void onCreate() {
-        Context context = getApplicationContext();
-        Positioning.initiate(context);
+        Log.d(TAG, "onCreate()");
+        context = getApplicationContext();
+        positioning = Positioning.initiate(context);
         Detector.initiate(context);
     }
 
     public static void initiate(Context context) {
-        Intent intent = new Intent(context, Guardian.class);
+        Log.d(TAG, "initiate()");
+        intent = new Intent(context, Guardian.class);
         context.startService(intent);
+    }
+
+    public static void terminate (Context context) {
+        Log.d(TAG, "terminate()");
+        //Intent intent = new Intent(context, Guardian.class);
+        //this.stopService(intent);
+        context.stopService(intent);
     }
 
 //    @SuppressWarnings("deprecation")
     @Override
     public int onStartCommand(Intent intent, int flags, int startID) {
+
+        Log.d (TAG, "onStartCommand(): startID="+startID + " flags="+flags);
 
         /** SERGIO ENG - Previous old code, which is deprecated
         long now = System.currentTimeMillis();
@@ -66,6 +86,9 @@ public class Guardian extends Service {
                         .setSmallIcon(android.R.drawable.stat_sys_warning)
                         .setContentTitle("Fall Detector Guardian")
                         .setContentText("Guardian is active");
+
+
+
 // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(this, MainActivity.class);
 
@@ -84,11 +107,11 @@ public class Guardian extends Service {
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
         mBuilder.setContentIntent(resultPendingIntent);
-        NotificationManager mNotificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        gNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 // mId allows you to update the notification later on.
-        int mId = 1;
-        mNotificationManager.notify(mId, mBuilder.build());
+
+        gNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
 
 
         return (START_STICKY);
@@ -96,6 +119,18 @@ public class Guardian extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d (TAG, "onBind()");
         return (null);
     }
+
+    @Override
+    public void onDestroy() {
+
+        Log.d (TAG, "onDestroy()");
+        gNotificationManager.cancel(NOTIFICATION_ID);
+        positioning.terminate(context);
+        positioning = null;
+        Detector.terminate();
+    }
+
 }
