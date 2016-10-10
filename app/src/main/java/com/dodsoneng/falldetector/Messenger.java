@@ -67,6 +67,10 @@ public class Messenger extends BroadcastReceiver {
                         Alarm.siren(context);
                         prevent = true;
                     }
+                    if (content.contains("CALL")) {
+                        Alarm.call(context);
+                        prevent = true;
+                    }
                     if (prevent) {
                         this.abortBroadcast();
                     }

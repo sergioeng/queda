@@ -40,6 +40,7 @@ public class Alarm {
 
     @SuppressWarnings("deprecation")
     public static void siren(Context context) {
+        Log.d(TAG, "siren()");
         if (null == pool) {
             pool = new SoundPool(5, AudioManager.STREAM_ALARM, 0);
         }
@@ -51,6 +52,7 @@ public class Alarm {
     }
 
     public static void loudest(Context context, int stream) {
+        Log.d(TAG, "loudest()");
         AudioManager manager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         int loudest = manager.getStreamMaxVolume(stream);
         manager.setStreamVolume(stream, loudest, 0);
@@ -58,14 +60,15 @@ public class Alarm {
 
     public static void call(Context context) {
         String contact = Contact.get(context);
-        Log.d (TAG+".call: ", "contact=["+contact+"]");
+        Log.d (TAG, "call(): contact=["+contact+"]");
         if (contact != null && !"".equals(contact)) {
             Toast.makeText(context, "Calling guardian's phone number for help", Toast.LENGTH_SHORT).show();
             Intent call = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + contact));
             call.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(call);
             Telephony.handsfree(context);
-        } else {
+        }
+        else {
             Toast.makeText(context, "Please enter guardian's phone number in the settings", Toast.LENGTH_SHORT).show();
             siren(context);
         }

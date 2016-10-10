@@ -36,9 +36,9 @@ import android.util.Log;
 
 public class Guardian extends Service {
 
+    private static String TAG = "FD.GUARD";
 
     private static int NOTIFICATION_ID = 1;
-    private static String TAG = "FD.GUARD";
     private static Intent intent = null;
     private Context context;
     private NotificationManager gNotificationManager;

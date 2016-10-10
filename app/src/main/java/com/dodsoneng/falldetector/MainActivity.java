@@ -30,12 +30,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.Toast;
 
 public class MainActivity extends Activity implements View.OnClickListener {
+
+
+    private static String TAG = "FD.MAINA";
 
     private static final String[] INITIAL_PERMS={
             Manifest.permission.CALL_PHONE,
@@ -67,6 +71,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 
     private void eula(Context context) {
+        Log.d(TAG, "eula()");
 
         // Run the guardian
         Guardian.initiate(this);
@@ -93,6 +98,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate()");
+
         super.onCreate(savedInstanceState);
 
         gContext = this;
@@ -105,6 +112,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
+        Log.d(TAG, "onClick()");
         Intent intent;
         switch (view.getId()) {
             case R.id.settings:
@@ -132,6 +140,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 // SERGIO ENG: why two calls to Detecttor.inititate ???, So I commented the following one.
 //->>        Detector.initiate(this);
 //-----------------------------------------------------------------------------------------
+        Log.d(TAG, "initiateApp()");
         setContentView(R.layout.actitvity_main);
 
         WebView web = (WebView) findViewById(R.id.about);
@@ -181,6 +190,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        Log.d(TAG, "onRequestPermissionsResult()");
 
         /// Check if all permissions are granted
         if (checkPermissions ()) {

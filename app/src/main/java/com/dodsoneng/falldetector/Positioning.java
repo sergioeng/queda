@@ -58,7 +58,7 @@ public class Positioning implements LocationListener {
 
     public static void trigger() {
 
-        Log.d (TAG, ".trigger(): in");
+        Log.d (TAG, "trigger()" );
 
 
         if (null != singleton) {
@@ -67,11 +67,17 @@ public class Positioning implements LocationListener {
     }
 
     private Positioning(Context context) {
-        Log.d (TAG, ".Positioning(): in");
+        Log.d (TAG, "Positioning(): constructor");
         this.context = context;
         LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        gps = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        network = manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        try {
+            gps = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            network = manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        }
+        catch (SecurityException e) {
+            e.printStackTrace();
+            Log.d (TAG, "constructor: failed to getLastKnownLocation");
+        }
 
         reset();
     }
@@ -98,21 +104,29 @@ public class Positioning implements LocationListener {
 
     private void run() {
 
-        Log.d (TAG, ".run(): in");
+        Log.d (TAG, "run(): requesting location updates");
 
         enforce(context);
+
         synchronized (lock) {
             LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-            manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-            once = System.currentTimeMillis();
-            replied = false;
+            try {
+                manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+                manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+                once = System.currentTimeMillis();
+                replied = false;
+            }
+            catch (SecurityException e) {
+                e.printStackTrace();
+                Log.d (TAG, "constructor: failed to requestLocationUpdates");
+            }
+
         }
     }
 
     private void reset() {
 
-        Log.d (TAG, ".reset(): in");
+        Log.d (TAG, "reset(): removing location updates");
 
         LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         manager.removeUpdates(this);
@@ -130,19 +144,21 @@ public class Positioning implements LocationListener {
     }
 
     private static void enforceWiFi(Context context) {
-        Log.d (TAG, ".enforceWiFi(): in");
 
         WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        Log.d (TAG, "enforceWiFi(): BEF wifi state=" + wifi.getWifiState());
         wifi.setWifiEnabled(true);
-
+        Log.d (TAG, "enforceWiFi(): AFT wifi state=" + wifi.getWifiState());
     }
 
     @SuppressWarnings("deprecation")
     private static void enforceGPS(Context context) {
 
-        Log.d (TAG, ".enforceGPS(): in");
+        Log.d (TAG, "enforceGPS():");
 
         LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        Log.d (TAG, "enforceGPS(): provider is enabled="+ manager.isProviderEnabled(LocationManager.GPS_PROVIDER));
+
         if (manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             return;
         }
@@ -188,14 +204,14 @@ public class Positioning implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
 
-        Log.d (TAG, ".onLocationChanged():");
+        Log.d (TAG, "onLocationChanged():");
 
         enforce(context);
         synchronized (lock) {
             if (LocationManager.GPS_PROVIDER.equals(location.getProvider())) {
 
-                Log.d (TAG, ".onLocationChanged(): GPS accuracy: current("+gps.hasAccuracy()+ ") = "+gps.getAccuracy());
-                Log.d (TAG, ".onLocationChanged(): GPS accuracy: lastknw("+location.hasAccuracy()+ ") = "+location.getAccuracy());
+                Log.d (TAG, "onLocationChanged(): GPS accuracy: current("+gps.hasAccuracy()+ ") = "+gps.getAccuracy());
+                Log.d (TAG, "onLocationChanged(): GPS accuracy: lastknw("+location.hasAccuracy()+ ") = "+location.getAccuracy());
 
                 if (accuracy(location) <= accuracy(gps)) {
                     Log.d (TAG, ".onLocationChanged(): GPS provider ... good accuracy ... using new GPS location");
@@ -206,15 +222,15 @@ public class Positioning implements LocationListener {
                 }
             }
             if (LocationManager.NETWORK_PROVIDER.equals(location.getProvider())) {
-                Log.d (TAG, ".onLocationChanged(): NET accuracy: current("+network.hasAccuracy()+ ") = "+network.getAccuracy());
-                Log.d (TAG, ".onLocationChanged(): NET accuracy: lastknw("+location.hasAccuracy()+ ") = "+location.getAccuracy());
+                Log.d (TAG, "onLocationChanged(): NET accuracy: current("+network.hasAccuracy()+ ") = "+network.getAccuracy());
+                Log.d (TAG, "onLocationChanged(): NET accuracy: lastknw("+location.hasAccuracy()+ ") = "+location.getAccuracy());
                 if (accuracy(location) <= accuracy(network)) {
-                    Log.d (TAG, ".onLocationChanged(): NET provider ... good accuracy ... using new NET location");
+                    Log.d (TAG, "onLocationChanged(): NET provider ... good accuracy ... using new NET location");
                     /// BUG FIX by Sergio Eng: it was  =>  gps = location;
                     network = location;
                 }
                 else {
-                    Log.d (TAG, ".onLocationChanged(): NET provider ... bad  accuracy ... using old NET location");
+                    Log.d (TAG, "onLocationChanged(): NET provider ... bad  accuracy ... using old NET location");
                 }
             }
 
@@ -227,11 +243,12 @@ public class Positioning implements LocationListener {
                     message = "Battery: %d%%; Location unknown";
                     message = String.format(Locale.US, message, battery);
                 } else {
+
                     if (accuracy(gps) <= accuracy(network)) {
-                        Log.d (TAG, ".onLocationChanged(): Using GPS location");
+                        Log.d (TAG, "onLocationChanged(): Using GPS location. Accuracy="+accuracy(gps));
                         location = gps;
                     } else {
-                        Log.d (TAG, ".onLocationChanged(): Using NET location");
+                        Log.d (TAG, "onLocationChanged(): Using NET location. Accuracy="+accuracy(network));
                         location = network;
                     }
                     double lat = location.getLatitude();
